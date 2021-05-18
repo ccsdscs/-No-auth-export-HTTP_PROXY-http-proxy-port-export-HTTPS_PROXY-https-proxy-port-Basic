@@ -1,0 +1,69 @@
+const Discord = require('discord.js');
+
+const BotConfig = require('./config.json');
+
+const ytdl = require('ytdl-core');
+
+const client = new Discord.Client();
+
+client.once('ready', () => {
+
+    console.log('Ready!');
+
+});
+
+client.login(BotConfig.token);
+
+client.on('message', message => {
+
+    // Voice only works in guilds, if the message does not come from a guild,
+
+    // we ignore it
+
+    if (!message.guild) return;
+
+    if (message.content === '/join') {
+
+        // Only try to join the sender's voice channel if they are in one themselves
+
+        if (message.member.voice.channel) {
+
+            message.member.voice.channel.join()
+
+                .then(connection => { // Connection is an instance of VoiceConnection
+
+                    message.reply('I have successfully connected to the channel!');
+
+                    const dispatcher = connection.play(
+
+                        ytdl("https://www.youtube.com/watch?v=UJIHwC5Derk", { filter: "audioonly" }),
+
+                        { bitrate: "auto" }
+
+                    );
+
+                })
+
+                .catch(console.log);
+
+        } else {
+
+            message.reply('You need to join a voice channel first!');
+
+        }
+
+    }
+
+});
+
+client.on('message', message => {
+
+    if (message.content === '/bye') {
+
+        client.voiceConnections.first().disconnect();
+
+        client.destroy();
+
+    }
+
+});
